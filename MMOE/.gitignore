@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+outputs/
+checkpoints/
+models/
+*.h5
+*.pt
+*.pth
+*.npy
+*.npz
+*.pkl
+*.log
