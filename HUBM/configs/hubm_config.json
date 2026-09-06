@@ -1,0 +1,18 @@
+{
+  "data_path": "data/scenarios_0134_selected.csv",
+  "image_folder": "data/AntM2C_image",
+  "output_dir": "outputs/hubm",
+  "clip_model": "OFA-Sys/chinese-clip-vit-base-patch16",
+  "bert_model": "bert-base-chinese",
+  "clip_epochs": 10,
+  "stage2_epochs": 2,
+  "clip_batch_size": 512,
+  "stage2_batch_size": 32,
+  "learning_rate_clip": 1e-5,
+  "learning_rate_stage2": 2e-5,
+  "hidden_size": 512,
+  "max_items": null,
+  "num_workers": 2,
+  "master_addr": "localhost",
+  "master_port": "12355"
+}

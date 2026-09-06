@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Large local datasets and generated artifacts
+data/
+outputs/
+checkpoints/
+models/
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.npy
+*.npz
+
+# Logs
+*.log
+wandb/
+runs/
