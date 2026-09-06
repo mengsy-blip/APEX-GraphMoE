@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Local environments
+.venv/
+venv/
+env/
+
+# Large model and training artifacts
+LLN/models/lora_model/*
+!LLN/models/lora_model/README.md
+LLN/outputs/gcn_logs_incremental_bert/*
+!LLN/outputs/gcn_logs_incremental_bert/README.md
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.npy
+*.npz
+optimizer.pt
+checkpoint-*/
+
+# Logs
+*.log
+runs/
+wandb/

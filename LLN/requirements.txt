@@ -1,0 +1,11 @@
+pandas
+numpy
+scipy
+scikit-learn
+tqdm
+h5py
+torch
+transformers
+datasets
+peft
+accelerate
