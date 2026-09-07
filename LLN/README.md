@@ -10,7 +10,7 @@ LLN builds semantic user-user relations from LLM-generated user interest summari
 - `src/finetune_deepseek_lora.py`: DeepSeek LoRA fine-tuning script.
 - `src/lln_lightgcn_train.py`: LLN training script based on LightGCN and BERT user-interest embeddings.
 - `models/lora_model/`: placeholder for the trained LoRA adapter.
-- `outputs/gcn_logs_incremental_bert/`: placeholder for trained LLN outputs.
+- `outputs/gcn_logs_incremental_bert/`: split archive of trained LLN/LightGCN graph outputs for MMOE training.
 
 ## Data format
 

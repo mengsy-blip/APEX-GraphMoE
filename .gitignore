@@ -13,6 +13,7 @@ LLN/models/lora_model/*
 !LLN/models/lora_model/README.md
 LLN/outputs/gcn_logs_incremental_bert/*
 !LLN/outputs/gcn_logs_incremental_bert/README.md
+!LLN/outputs/gcn_logs_incremental_bert/gcn_logs_incremental_bert.zip.part*
 *.pt
 *.pth
 *.bin

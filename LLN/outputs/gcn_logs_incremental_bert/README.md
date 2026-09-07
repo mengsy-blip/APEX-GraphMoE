@@ -1,11 +1,29 @@
-# LLN Training Outputs
+# LLN LightGCN Outputs
 
-This directory is reserved for LightGCN/LLN training outputs.
+This directory stores the trained LLN/LightGCN graph outputs used by MMOE.
 
-The original local artifact directory was:
+The original output directory was compressed into `gcn_logs_incremental_bert.zip` and split into multiple parts to keep every GitHub file below the 100 MB single-file limit.
 
-```text
-E:/experiments/core_experiments/llm_plus_lightgcn/gcn_logs_incremental_bert
+## Contents
+
+- `gcn_logs_incremental_bert.zip.part001` ... `gcn_logs_incremental_bert.zip.part009`: split archive parts for the trained graph outputs.
+
+After reconstruction, the archive contains scene-level LightGCN outputs, including user/item graph embeddings and trained model checkpoints. These outputs can be used directly as graph embedding inputs for MMOE training.
+
+## Reconstruct on Windows PowerShell
+
+Run this command inside this directory:
+
+```powershell
+Get-Content -Encoding Byte -Path .\gcn_logs_incremental_bert.zip.part* | Set-Content -Encoding Byte .\gcn_logs_incremental_bert.zip
+Expand-Archive .\gcn_logs_incremental_bert.zip -DestinationPath .\gcn_logs_incremental_bert
 ```
 
-The training output directory is about 919 MB and contains model checkpoints, user/item embeddings, BERT user embedding matrices, mappings, and per-scene statistics. These generated files are excluded from normal Git commits by `.gitignore`.
+## Reconstruct on Linux/macOS
+
+Run this command inside this directory:
+
+```bash
+cat gcn_logs_incremental_bert.zip.part* > gcn_logs_incremental_bert.zip
+unzip gcn_logs_incremental_bert.zip -d gcn_logs_incremental_bert
+```
