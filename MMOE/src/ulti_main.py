@@ -1,4 +1,4 @@
-# train_main_heterogeneous.py - 异构专家流式训练主程序
+
 import os
 import torch
 import torch.nn as nn
@@ -9,7 +9,7 @@ import psutil
 import gc
 warnings.filterwarnings('ignore')
 
-# 导入异构专家模型和训练模块
+
 from multi_mmoe import HeterogeneousMMoE_FullEmbeddings, create_heterogeneous_mmoe_model
 from multi_model_train import (
     train_model_memory_single_gpu_full_embeddings,
@@ -20,7 +20,6 @@ from utils import find_h5_files
 
 
 def set_seed(seed):
-    """设置随机种子"""
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -31,10 +30,9 @@ def set_seed(seed):
 
 
 def check_memory_requirements_heterogeneous(train_files, test_files, max_samples=None):
-    """检查异构专家模型的内存需求"""
     print(f"🔍 检查异构专家模型内存需求...")
     
-    # 获取系统内存信息
+    
     memory_info = psutil.virtual_memory()
     total_memory_gb = memory_info.total / (1024**3)
     available_memory_gb = memory_info.available / (1024**3)
@@ -43,7 +41,7 @@ def check_memory_requirements_heterogeneous(train_files, test_files, max_samples
     print(f"  总内存: {total_memory_gb:.1f} GB")
     print(f"  可用内存: {available_memory_gb:.1f} GB")
     
-    # 估算单文件内存需求
+    
     max_file_memory = 0
     total_samples = 0
     
@@ -60,8 +58,8 @@ def check_memory_requirements_heterogeneous(train_files, test_files, max_samples
                 if max_samples and file_samples > max_samples:
                     file_samples = max_samples
                 
-                # 异构专家模型特征内存估算
-                sample_size_kb = 25  # 图像+文本+ID+用户ID+物品ID
+                
+                sample_size_kb = 25  
                 file_memory_gb = (file_samples * sample_size_kb) / (1024 * 1024)
                 
                 max_file_memory = max(max_file_memory, file_memory_gb)
@@ -72,7 +70,7 @@ def check_memory_requirements_heterogeneous(train_files, test_files, max_samples
         except Exception as e:
             print(f"  ⚠️ 文件 {i+1} 检查失败: {e}")
     
-    # 检查LightGCN图嵌入大小
+    
     lightgcn_memory_gb = 0
     gcn_logs_dir = "/root/megrez-tmp/code/baseline+lightgcn/训练lightgcn/gcn_logs_incremental"
     if os.path.exists(gcn_logs_dir):
@@ -96,10 +94,10 @@ def check_memory_requirements_heterogeneous(train_files, test_files, max_samples
     else:
         print(f"⚠️ LightGCN目录不存在: {gcn_logs_dir}")
     
-    # 异构专家模型内存需求计算
+    
     pytorch_memory_gb = max_file_memory * 1.5
-    model_memory_gb = 0.5  # 异构专家模型稍大
-    training_overhead_gb = 2.0 + lightgcn_memory_gb  # 训练开销+图嵌入
+    model_memory_gb = 0.5  
+    training_overhead_gb = 2.0 + lightgcn_memory_gb  
     
     total_required_gb = pytorch_memory_gb + model_memory_gb + training_overhead_gb
     
@@ -112,7 +110,7 @@ def check_memory_requirements_heterogeneous(train_files, test_files, max_samples
     print(f"  峰值内存需求: ~{total_required_gb:.2f} GB")
     print(f"  🔥 异构优势: 专家特化，更高效的特征处理")
     
-    # 检查是否有足够内存
+    
     memory_ratio = total_required_gb / available_memory_gb
     
     if memory_ratio > 0.9:
@@ -127,25 +125,23 @@ def check_memory_requirements_heterogeneous(train_files, test_files, max_samples
 
 
 def optimize_memory_settings():
-    """优化内存设置"""
     print("🔧 优化内存设置...")
     
-    # 设置PyTorch内存管理
+    
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:512'
         print("✅ CUDA内存优化已启用")
     
-    # 设置垃圾回收
+    
     gc.set_threshold(700, 10, 10)
     print("✅ 垃圾回收优化已启用")
 
 
 def check_environment():
-    """检查训练环境（包含异构专家检查）"""
     print("🔍 检查异构专家训练环境...")
     
-    # 检查CUDA
+    
     if torch.cuda.is_available():
         gpu_name = torch.cuda.get_device_name(0)
         gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1024**3
@@ -161,7 +157,7 @@ def check_environment():
     else:
         print("⚠️ CUDA不可用，将使用CPU（不推荐）")
     
-    # 检查LightGCN图嵌入
+    
     gcn_logs_dir = "/root/megrez-tmp/code/baseline+lightgcn/训练lightgcn/gcn_logs_incremental"
     if os.path.exists(gcn_logs_dir):
         scene_dirs = [d for d in os.listdir(gcn_logs_dir) if d.startswith('scene_')]
@@ -196,10 +192,9 @@ def check_environment():
 
 
 def prepare_data_files(train_data_dir, test_data_dir, train_files=None, test_files=None):
-    """准备数据文件"""
     print("🔍 准备数据文件...")
     
-    # 查找训练和测试文件
+    
     if train_files:
         train_files = [f for f in train_files if os.path.exists(f)]
         print(f"📂 使用指定的训练文件: {len(train_files)} 个")
@@ -214,7 +209,7 @@ def prepare_data_files(train_data_dir, test_data_dir, train_files=None, test_fil
         test_files = find_h5_files(test_data_dir)
         print(f"📂 从目录查找测试文件: {len(test_files)} 个")
     
-    # 如果在同一个目录，需要区分训练和测试文件
+    
     if train_data_dir == test_data_dir and not (train_files and test_files):
         all_files = find_h5_files(train_data_dir)
         train_files = [f for f in all_files if 'train' in os.path.basename(f).lower()]
@@ -257,16 +252,15 @@ def prepare_data_files(train_data_dir, test_data_dir, train_files=None, test_fil
 
 
 def create_heterogeneous_model_config(base_config):
-    """创建异构专家模型配置"""
     print("🏗️ 配置异构专家多模态MMoE模型...")
     
-    # 异构专家模型参数
+    
     model_config = {
-        'image_emb_dim': 256,      # 图像嵌入维度
-        'text_emb_dim': 3840,      # 文本嵌入维度 (5*768)
-        'id_emb_dim': 896,         # ID嵌入维度 (29*32)
-        # 🔥 异构专家配置
-        'use_lightgcn': True,      # 启用LightGCN图专家
+        'image_emb_dim': 256,      
+        'text_emb_dim': 3840,      
+        'id_emb_dim': 896,         
+        
+        'use_lightgcn': True,      
         'gcn_logs_dir': "/root/megrez-tmp/code/baseline+lightgcn/训练lightgcn/gcn_logs_incremental",
         **base_config
     }
@@ -284,7 +278,6 @@ def create_heterogeneous_model_config(base_config):
 
 
 def analyze_expert_performance(model, test_files, device, max_samples=5000):
-    """分析异构专家性能"""
     print("\n📊 分析异构专家性能...")
     
     if not test_files:
@@ -294,12 +287,12 @@ def analyze_expert_performance(model, test_files, device, max_samples=5000):
     model.eval()
     
     try:
-        # 加载一个测试文件
+        
         test_data = load_single_h5_file_to_memory_full_embeddings(
             test_files[0], max_samples=max_samples
         )
         
-        # 准备数据
+        
         image_emb = torch.tensor(test_data['image_embeddings'][:100], dtype=torch.float32).to(device)
         text_emb = torch.tensor(test_data['text_embeddings'][:100], dtype=torch.float32).to(device)
         id_emb = torch.tensor(test_data['id_embeddings'][:100], dtype=torch.float32).to(device)
@@ -308,7 +301,7 @@ def analyze_expert_performance(model, test_files, device, max_samples=5000):
         item_ids = test_data['item_ids'][:100]
         
         with torch.no_grad():
-            # 获取专家权重分析
+            
             expert_weights = model.get_expert_weights(
                 image_emb, text_emb, id_emb, scenes, user_ids, item_ids
             )
@@ -320,7 +313,7 @@ def analyze_expert_performance(model, test_files, device, max_samples=5000):
                 for expert, weight in sorted_experts:
                     print(f"    {expert}: {weight:.3f}")
             
-            # 获取专家贡献分析
+            
             contributions = model.get_expert_contributions(
                 image_emb, text_emb, id_emb, scenes, user_ids, item_ids
             )
@@ -330,7 +323,7 @@ def analyze_expert_performance(model, test_files, device, max_samples=5000):
                 if not contrib_type.endswith('比例'):
                     print(f"  {contrib_type}: {value:.4f}")
             
-            # 冷启动分析
+            
             if '冷启动用户比例' in contributions:
                 cold_ratio = contributions['冷启动用户比例']
                 print(f"\n❄️ 冷启动分析:")
@@ -347,25 +340,24 @@ def analyze_expert_performance(model, test_files, device, max_samples=5000):
 
 
 def main():
-    """异构专家训练主函数"""
     print("🚀 开始异构专家单GPU多模态MMoE训练...")
     print("=" * 90)
     
-    # 1. 设置随机种子
+    
     set_seed(42)
     print("✅ 随机种子已设置")
     
-    # 2. 优化内存设置
+    
     optimize_memory_settings()
     
-    # 3. 检查环境
+    
     if not check_environment():
         print("❌ 环境检查失败")
         return
     
-    # 4. 配置参数 - 异构专家配置
+    
     config = {
-        # 数据路径
+        
         'train_data_dir': "/root/megrez-tmp/embeddings_pretrained",
         'test_data_dir': "/root/megrez-tmp/embeddings_pretrained",
         
@@ -379,27 +371,27 @@ def main():
             "/root/megrez-tmp/embeddings_pretrained/antm2c_10m_part1_test_embeddings.h5",
             "/root/megrez-tmp/embeddings_pretrained/antm2c_10m_part2_test_embeddings.h5",
         ],
-        # 模型保存 (异构专家版本)
+        
         'model_save_dir': "heterogeneous_model_full_embeddings",
         'model_save_name': "heterogeneous_mmoe_full_embeddings_best.pt",
         
-        # 训练参数
+        
         'epochs': 50,
-        'learning_rate': 3e-5,  # 异构专家可能需要更小的学习率
-        'batch_size': 4096,     # 适中的batch_size
+        'learning_rate': 3e-5,  
+        'batch_size': 4096,     
         'early_stop': 8,
         'max_samples': None,
         
-        'use_mmap': True,       # 兼容参数
+        'use_mmap': True,       
         
-        # 异构专家模型架构参数
+        
         'model_config': {
             'expert_hidden_dim': 512,
             'tower_hidden_dims': [512, 256, 128],
             'output_dim': 1,
             'dropout': 0.3,
             'num_scenes': 5,
-            # 🔥 异构专家配置
+            
             'use_lightgcn': True,
             'gcn_logs_dir': "/root/megrez-tmp/code/baseline+lightgcn/训练lightgcn/gcn_logs_incremental"
         }
@@ -415,7 +407,7 @@ def main():
         marker = "🔥" if key in ['use_lightgcn', 'gcn_logs_dir'] else "  "
         print(f"  {marker} {key}: {value}")
     
-    # 5. 准备数据文件
+    
     success, train_files, test_files = prepare_data_files(
         config['train_data_dir'], 
         config['test_data_dir'],
@@ -427,7 +419,7 @@ def main():
         print("❌ 数据文件准备失败")
         return
     
-    # 6. 检查内存需求
+    
     print("\n" + "="*60)
     memory_ok, required_memory = check_memory_requirements_heterogeneous(
         train_files, test_files, config['max_samples']
@@ -442,7 +434,7 @@ def main():
         print("  4. 增加系统内存")
         return
     
-    # 7. 创建异构专家模型配置
+    
     os.makedirs(config['model_save_dir'], exist_ok=True)
     save_path = os.path.join(config['model_save_dir'], config['model_save_name'])
     
@@ -468,7 +460,7 @@ def main():
     print("="*60)
     
     try:
-        # 8. 开始异构专家训练
+        
         print(f"\n🚀 启动异构专家训练...")
         
         best_auc = train_model_memory_single_gpu_full_embeddings(
@@ -490,7 +482,7 @@ def main():
         print(f"🏆 最佳AUC: {best_auc:.4f}")
         print(f"💾 模型已保存: {save_path}")
         
-        # 9. 验证保存的模型
+        
         if os.path.exists(save_path):
             model_size = os.path.getsize(save_path) / (1024**2)
             print(f"📊 模型文件大小: {model_size:.1f} MB")
@@ -503,21 +495,21 @@ def main():
                 print(f"  🔄 流式处理: {checkpoint.get('use_streaming', '未记录')}")
                 print(f"  🔥 异构专家: {checkpoint.get('use_lightgcn', '未记录')}")
                 
-                # 10. 加载模型进行专家分析
+                
                 print(f"\n📊 加载模型进行专家性能分析...")
                 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
                 
-                # 创建模型并加载权重
+                
                 model = model_class(**model_kwargs).to(device)
                 model.load_state_dict(checkpoint['model_state_dict'])
                 
-                # 分析专家性能
+                
                 analyze_expert_performance(model, test_files, device)
                 
             except Exception as e:
                 print(f"⚠️ 模型验证失败: {e}")
         
-        # 11. 最终报告
+        
         memory_info = psutil.virtual_memory()
         print(f"\n📊 最终系统状态:")
         print(f"  内存使用率: {memory_info.percent:.1f}%")
@@ -556,7 +548,6 @@ def main():
 
 
 def quick_heterogeneous_test(data_files=None, max_samples=1000):
-    """快速异构专家模型测试"""
     print(f"🧪 快速异构专家模型测试...")
     
     if data_files is None:
@@ -565,7 +556,7 @@ def quick_heterogeneous_test(data_files=None, max_samples=1000):
         ]
     
     try:
-        # 加载测试数据
+        
         data = load_single_h5_file_to_memory_full_embeddings(
             data_files[0], 
             max_samples=max_samples
@@ -574,10 +565,10 @@ def quick_heterogeneous_test(data_files=None, max_samples=1000):
         print(f"✅ 数据加载成功!")
         print(f"  样本数: {len(data['labels']):,}")
         
-        # 创建异构专家模型
+        
         model = create_heterogeneous_mmoe_model()
         
-        # 准备测试数据
+        
         batch_size = min(10, len(data['labels']))
         image_emb = torch.tensor(data['image_embeddings'][:batch_size], dtype=torch.float32)
         text_emb = torch.tensor(data['text_embeddings'][:batch_size], dtype=torch.float32)
@@ -586,7 +577,7 @@ def quick_heterogeneous_test(data_files=None, max_samples=1000):
         user_ids = data['user_ids'][:batch_size]
         item_ids = data['item_ids'][:batch_size]
         
-        # 测试前向传播
+        
         model.eval()
         with torch.no_grad():
             output = model(image_emb, text_emb, id_emb, scenes, user_ids, item_ids)
@@ -595,7 +586,7 @@ def quick_heterogeneous_test(data_files=None, max_samples=1000):
         print(f"  输出形状: {output.shape}")
         print(f"  输出范围: [{output.min():.3f}, {output.max():.3f}]")
         
-        # 测试专家分析
+        
         expert_weights = model.get_expert_weights(image_emb, text_emb, id_emb, scenes, user_ids, item_ids)
         print(f"  专家权重分析: ✅")
         
@@ -618,7 +609,7 @@ if __name__ == "__main__":
         mode = sys.argv[1]
         
         if mode == "test":
-            # 快速测试模式
+            
             max_samples = int(sys.argv[2]) if len(sys.argv) > 2 else 1000
             
             print(f"🧪 异构专家测试参数:")
@@ -628,7 +619,7 @@ if __name__ == "__main__":
             quick_heterogeneous_test(max_samples=max_samples)
             
         elif mode == "train":
-            # 开始训练
+            
             main()
             
         else:
@@ -639,6 +630,6 @@ if __name__ == "__main__":
             print("    示例: python train_main_heterogeneous.py test 1000        # 测试1000样本")
             print("  🔥 特点: 5个异构专家各司其职，性能和可解释性双提升")
     else:
-        # 默认运行训练
+        
         print("🚀 启动异构专家单GPU训练...")
         main()
