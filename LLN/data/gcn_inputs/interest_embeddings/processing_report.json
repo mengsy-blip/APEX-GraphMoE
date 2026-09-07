@@ -1,0 +1,19 @@
+{
+  "successful_scenes": 1,
+  "total_scenes": 5,
+  "total_users": 45106,
+  "total_valid_interests": 45106,
+  "overall_coverage": 1.0,
+  "scene_results": {
+    "scene_1": {
+      "success": true,
+      "input_file": "/root/megrez-tmp/code/提取大模型训练数据集/lora_generated/bert转化/数据/scene_1_ddp_lora_portraits.csv",
+      "output_file": "/root/megrez-tmp/code/提取大模型训练数据集/lora_generated/bert转化/数据/interest_embeddings/scene_1_interest_embeddings.csv",
+      "total_users": 45106,
+      "valid_interests": 45106,
+      "coverage_rate": 1.0,
+      "output_columns": 132,
+      "embedding_dim": 128
+    }
+  }
+}
